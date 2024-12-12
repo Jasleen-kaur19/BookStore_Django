@@ -1,17 +1,16 @@
+import json
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.csrf import csrf_exempt
-import json
-
 from .forms import BookForm, OrderForm, SignupForm
 from .models import Book, Cart, CartItem, Order
 
+
+# User Management Views
 def signup(request):
-    """Handle user registration with custom SignupForm."""
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -32,11 +31,7 @@ def signup(request):
 
     return render(request, 'bookstore_app/signup.html', {'form': form})
 
-
-# Authentication Views
-@csrf_exempt
 def user_login(request):
-    """Handle user login with username and password."""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -67,11 +62,22 @@ def user_login(request):
 
     return render(request, 'bookstore_app/login.html')
 
+def logout_view(request):
+    cart = CartManager.get_cart(request)
+    if cart and not request.user.is_authenticated:
+        cart_items = [
+            {'book_id': item.book.id, 'quantity': item.quantity}
+            for item in cart.cart_items.all()
+        ]
+        request.session['cart_items'] = cart_items
+    logout(request)
+    request.session.pop('cart_id', None)  
+    messages.success(request, "Successfully logged out.")
+    return redirect('login')
 
 # Book Management Views
 @login_required
 def book_list(request):
-    """Display all books."""
     genre_filter = request.GET.get('genre', '')
     books = Book.objects.filter(genre__icontains=genre_filter)
     return render(request, 'bookstore_app/base.html', {
@@ -82,7 +88,6 @@ def book_list(request):
 
 @login_required
 def add_book(request):
-    """Add a new book to the store."""
     if not request.user.is_staff:
         return redirect('book_list')
         
@@ -98,7 +103,6 @@ def add_book(request):
 
 @login_required
 def delete_book(request, book_id):
-    """Delete a book from the store."""
     if request.user.is_staff:
         book = get_object_or_404(Book, id=book_id)
         book.delete()
@@ -106,17 +110,13 @@ def delete_book(request, book_id):
     return redirect('book_list')
 
 # Cart Manager Class
-class CartManager:
-    """Handle all cart-related operations."""
-    
+class CartManager:    
     @staticmethod
     def get_cart(request):
-        """Retrieve or create cart for the logged-in user."""
         if request.user.is_authenticated:
             cart, created = Cart.objects.get_or_create(user=request.user)
             return cart
         else:
-            # Fallback to session-based cart for anonymous users
             cart_id = request.session.get('cart_id')
             if not cart_id:
                 return None
@@ -124,7 +124,6 @@ class CartManager:
 
     @staticmethod
     def create_cart(request):
-        """Create a new cart for the logged-in user or session."""
         if request.user.is_authenticated:
             cart = Cart.objects.create(user=request.user)
         else:
@@ -134,34 +133,12 @@ class CartManager:
 
     @staticmethod
     def calculate_total(cart):
-        """Calculate total price for cart items."""
         return sum(item.total_price for item in cart.cart_items.all())
 
-# Order Manager Class
-class OrderManager:
-    """Handle all order-related operations."""
-    
-    @staticmethod
-    def create_order(cart):
-        """Create a new order from cart contents."""
-        return Order.objects.create(
-            cart=cart,
-            total_price=cart.total_price
-        )
-
-    @staticmethod
-    def clear_cart(request):
-        """Remove all items from cart and delete it."""
-        cart = CartManager.get_cart(request)
-        if cart:
-            cart.cart_items.all().delete()
-            cart.delete()
-            request.session.pop('cart_id', None)
 
 # Cart Management Views
 @login_required
 def cart(request):
-    """Display cart contents."""
     cart = CartManager.get_cart(request)
     total_price = CartManager.calculate_total(cart) if cart else 0
     return render(request, 'bookstore_app/cart.html', {
@@ -170,14 +147,12 @@ def cart(request):
     })
 
 def get_cart_count(request):
-    """Return current cart item count as JSON."""
     cart = CartManager.get_cart(request)
     count = sum(item.quantity for item in cart.cart_items.all()) if cart else 0
     return JsonResponse({'count': count})
 
 @login_required
 def update_quantity(request, book_id):
-    """Update quantity of a book in the cart."""
     if request.method == 'POST':
         action = request.POST.get('action')
         cart = CartManager.get_cart(request)
@@ -204,7 +179,6 @@ def update_quantity(request, book_id):
 
 @login_required
 def add_to_cart(request, book_id):
-    """Add a book to the cart."""
     book = get_object_or_404(Book, id=book_id)
     cart = CartManager.get_cart(request) or CartManager.create_cart(request)
     
@@ -225,7 +199,6 @@ def add_to_cart(request, book_id):
 
 @login_required
 def remove_from_cart(request, book_id):
-    """Remove a book from the cart."""
     book = get_object_or_404(Book, id=book_id)
     cart = CartManager.get_cart(request)
     
@@ -245,9 +218,7 @@ def remove_from_cart(request, book_id):
     messages.success(request, f'"{book.title}" removed from cart.')
     return redirect('cart')
 
-@csrf_exempt
 def sync_cart(request):
-    """Sync cart from localStorage to the server."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
         
@@ -274,7 +245,6 @@ def sync_cart(request):
 
 @login_required
 def get_cart_items(request):
-    """API to fetch current cart items for the logged-in user."""
     cart = CartManager.get_cart(request)
     if not cart:
         return JsonResponse({'cart': []}, status=200)
@@ -287,10 +257,27 @@ def get_cart_items(request):
     
     return JsonResponse({'cart': items}, status=200)
 
+
+# Order Manager Class
+class OrderManager:
+    @staticmethod
+    def create_order(cart):
+        return Order.objects.create(
+            cart=cart,
+            total_price=cart.total_price
+        )
+
+    @staticmethod
+    def clear_cart(request):
+        cart = CartManager.get_cart(request)
+        if cart:
+            cart.cart_items.all().delete()
+            cart.delete()
+            request.session.pop('cart_id', None)
+
 # Order Management Views
 @login_required
 def checkout(request):
-    """Process checkout and ask for address."""
     cart = CartManager.get_cart(request)
     if not cart:
         messages.error(request, 'Cart not found.')
@@ -313,7 +300,6 @@ def checkout(request):
 
 @login_required
 def order_confirmation(request):
-    """Display order confirmation page."""
     cart = CartManager.get_cart(request)
     if not cart:
         return redirect('book_list')
@@ -333,20 +319,5 @@ def order_confirmation(request):
     })
 
 def order_success(request):
-    """Display order success page."""
     return render(request, 'bookstore_app/order_success.html')
 
-def logout_view(request):
-    """Handle user logout."""
-    cart = CartManager.get_cart(request)
-    if cart and not request.user.is_authenticated:
-        # Save cart items to session for anonymous users
-        cart_items = [
-            {'book_id': item.book.id, 'quantity': item.quantity}
-            for item in cart.cart_items.all()
-        ]
-        request.session['cart_items'] = cart_items
-    logout(request)
-    request.session.pop('cart_id', None)  # Remove session-based cart
-    messages.success(request, "Successfully logged out.")
-    return redirect('login')
