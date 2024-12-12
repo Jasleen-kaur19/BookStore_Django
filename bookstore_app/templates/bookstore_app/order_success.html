@@ -1,0 +1,135 @@
+{% extends 'bookstore_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Base Styles */
+    body {
+        margin: 0;
+        padding: 0;
+        background-image: linear-gradient(
+            rgba(0, 0, 0, 0.6),
+            rgba(0, 0, 0, 0.6)
+        ),
+        url('{% static "images/book_delivery.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+
+    /* Layout */
+    .success-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    /* Card Styles */
+    .success-card {
+        max-width: 600px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    /* Typography */
+    .success-title {
+        color: #2ecc71;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .success-card p {
+        color: #34495e;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.6;
+    }
+
+    /* Button Styles */
+    .btn-primary {
+        background: linear-gradient(145deg, #3498db, #2980b9);
+        color: white !important;
+        padding: 15px 40px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border: none;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+        background: linear-gradient(145deg, #2980b9, #2471a3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .success-card {
+            padding: 30px;
+        }
+
+        .success-title {
+            font-size: 2rem;
+        }
+
+        .success-card p {
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+        <div class="text-center">
+            <h2 class="success-title">Thank you for your purchase!</h2>
+            <p>Your order has been successfully placed.</p>
+            <p>Your items will be delivered to the address you provided.</p>
+            <p>Payment will be collected upon delivery (Cash on Delivery).</p>
+            <a href="{% url 'book_list' %}" class="btn btn-primary">
+                Go back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

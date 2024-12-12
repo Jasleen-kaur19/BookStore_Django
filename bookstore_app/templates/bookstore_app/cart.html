@@ -1,0 +1,220 @@
+{% extends 'bookstore_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="cart-container bg-white shadow-sm rounded p-4">
+        <h2 class="mb-4">Your Shopping Cart</h2>
+        
+        {% if cart and cart.cart_items.all %}
+            <!-- Cart Items List -->
+            <div class="cart-items">
+                {% for item in cart.cart_items.all %}
+                    <div class="cart-item border rounded mb-3 p-3">
+                        <div class="row align-items-center">
+                            <!-- Book Cover -->
+                            <div class="col-md-2">
+                                <img src="{{ item.book.cover_image.url }}" 
+                                     alt="{{ item.book.title }}" 
+                                     class="cart-item-image img-fluid rounded">
+                            </div>
+                            
+                            <!-- Book Information -->
+                            <div class="col-md-4">
+                                <h5 class="book-title mb-1">{{ item.book.title }}</h5>
+                                <p class="book-author text-muted mb-1">Author: {{ item.book.author }}</p>
+                                <p class="book-price text-primary mb-1">${{ item.book.price }}</p>
+                            </div>
+                            
+                            <!-- Quantity Controls -->
+                            <div class="col-md-3">
+                                <div class="quantity-controls d-flex align-items-center">
+                                    <form method="post" 
+                                          action="{% url 'update_quantity' item.book.id %}" 
+                                          class="quantity-form d-flex align-items-center">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                name="action" 
+                                                value="decrease" 
+                                                class="btn btn-outline-secondary btn-sm quantity-btn"
+                                                {% if item.quantity == 1 %}disabled{% endif %}>
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <span class="quantity-display mx-3">{{ item.quantity }}</span>
+                                        <button type="submit" 
+                                                name="action" 
+                                                value="increase" 
+                                                class="btn btn-outline-secondary btn-sm quantity-btn">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- Price and Remove Button -->
+                            <div class="col-md-3 text-end">
+                                <p class="item-total h5 mb-2">${{ item.total_price }}</p>
+                                <form method="post" 
+                                      action="{% url 'remove_from_cart' item.book.id %}" 
+                                      class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm remove-btn">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary mt-4 border-top pt-4">
+                <div class="row">
+                    <div class="col-md-6 offset-md-6">
+                        <div class="summary-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>${{ cart.total_price }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="h5">Total:</span>
+                                <span class="h5">${{ cart.total_price }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="cart-actions">
+                            <form method="post" action="{% url 'checkout' %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="btn btn-success w-100"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#orderPlacedModal">
+                                    Proceed to Checkout
+                                </button>
+                            </form>
+                            <a href="{% url 'book_list' %}" class="btn btn-outline-primary w-100">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Empty Cart State -->
+            <div class="empty-cart text-center py-5">
+                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                <h4>Your cart is empty</h4>
+                <p class="text-muted">Browse our collection and add some books!</p>
+                <a href="{% url 'book_list' %}" class="btn btn-primary mt-2">
+                    Start Shopping
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Order Success Modal -->
+<div class="modal fade" id="orderPlacedModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Placed Successfully!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <p>Your order has been placed successfully. Thank you for shopping with us!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Cart Container */
+    .cart-container {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    /* Cart Items */
+    .cart-item {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .cart-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .cart-item-image {
+        max-height: 120px;
+        object-fit: contain;
+    }
+    
+    /* Book Details */
+    .book-title {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .book-author {
+        font-size: 0.9rem;
+    }
+    
+    .book-price {
+        font-weight: 600;
+    }
+    
+    /* Quantity Controls */
+    .quantity-controls {
+        background-color: #fff;
+        border-radius: 20px;
+        padding: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .quantity-btn {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+    
+    .quantity-btn:hover:not(:disabled) {
+        background-color: #e9ecef;
+    }
+    
+    .quantity-display {
+        min-width: 30px;
+        text-align: center;
+    }
+    
+    /* Cart Summary */
+    .summary-details {
+        font-size: 1.1rem;
+    }
+    
+    /* Empty Cart */
+    .empty-cart i {
+        opacity: 0.5;
+    }
+    
+    /* Modal */
+    .modal-content {
+        border-radius: 8px;
+    }
+    
+    .modal i {
+        color: #28a745;
+    }
+</style>
+{% endblock %}

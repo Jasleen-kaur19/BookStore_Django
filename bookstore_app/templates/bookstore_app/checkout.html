@@ -1,0 +1,207 @@
+{% extends 'bookstore_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Background Styles -->
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            url('{% static "images/checkout.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+</style>
+
+<!-- Main Checkout Form -->
+<div class="checkout-wrapper">
+    <div class="container mt-5 checkout-container">
+        <h2 class="checkout-title">Checkout</h2>
+        <form method="post" class="checkout-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                        <span class="required-asterisk">*</span>
+                    {% endif %}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="error-message">
+                    {% for error in field.errors %}
+                        {% if error != "This field is required." %}
+                            {{ error }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-place-order">
+                Place Order
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Checkout Styles -->
+<style>
+    /* Layout Styles */
+    .checkout-wrapper {
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    .checkout-container {
+        max-width: 600px;
+        margin: auto;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 35px;
+        border-radius: 15px;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Glassmorphism Effect */
+    .checkout-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        box-shadow: inset 0 0 2000px rgba(255, 255, 255, .2);
+        filter: blur(10px);
+        z-index: -1;
+    }
+
+    /* Title Styles */
+    .checkout-title {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        letter-spacing: 0.5px;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .checkout-form label {
+        display: block;
+        font-weight: 600;
+        color: #34495e;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+        letter-spacing: 0.3px;
+    }
+
+    .checkout-form input,
+    .checkout-form select,
+    .checkout-form textarea {
+        width: 100%;
+        padding: 12px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .checkout-form input:focus,
+    .checkout-form select:focus,
+    .checkout-form textarea:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 15px rgba(52, 152, 219, 0.15);
+        outline: none;
+    }
+
+    /* Required Field Indicator */
+    .required-asterisk {
+        color: #e74c3c;
+        margin-left: 4px;
+        font-weight: bold;
+    }
+
+    .required-message {
+        display: none;
+    }
+
+    /* Error Message Styles */
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        padding: 5px 0;
+    }
+
+    /* Button Styles */
+    .btn-place-order {
+        width: 100%;
+        background: linear-gradient(145deg, #2ecc71, #27ae60);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        padding: 15px 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+    }
+
+    .btn-place-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+        background: linear-gradient(145deg, #27ae60, #219a52);
+    }
+
+    .btn-place-order:active {
+        transform: translateY(0);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .checkout-container {
+            margin: 20px;
+            padding: 25px;
+        }
+
+        .checkout-title {
+            font-size: 1.8rem;
+        }
+
+        .btn-place-order {
+            padding: 12px 20px;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .checkout-container {
+            margin: 15px;
+            padding: 20px;
+        }
+
+        .checkout-title {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'bookstore_app/base.html' %}
+
+{% block content %}
+<style>
+    .custom-form {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .custom-form label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .custom-form input[type="text"],
+    .custom-form input[type="number"],
+    .custom-form select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .custom-form input[type="text"]:focus,
+    .custom-form input[type="number"]:focus,
+    .custom-form select:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .custom-form input[type="file"] {
+        padding: 0.5rem 0;
+    }
+
+    .btn-primary {
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .page-title:after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 3px;
+        background: #007bff;
+        margin: 0.5rem auto;
+    }
+
+    .form-container {
+        background: #f8f9fa;
+        padding: 3rem 0;
+        min-height: 100vh;
+    }
+</style>
+
+<div class="form-container">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center page-title">Add a New Book</h1>
+                <form method="post" enctype="multipart/form-data" class="custom-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.title.label_tag }}
+                        {{ form.title }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.author.label_tag }}
+                        {{ form.author }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.genre.label_tag }}
+                        {{ form.genre }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.price.label_tag }}
+                        {{ form.price }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.cover_image.label_tag }}
+                        {{ form.cover_image }}
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Add Book</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

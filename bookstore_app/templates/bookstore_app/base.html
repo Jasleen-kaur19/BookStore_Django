@@ -1,0 +1,444 @@
+{% load static %}{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore</title>
+
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Layout */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        
+        main { 
+            flex: 1; 
+            padding: 20px;
+        }
+
+        /* Book Cards */
+        .book-card {
+            flex: 0 0 33.333%;
+            max-width: 33.333%;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .book-image {
+            height: 400px;
+            width: 100%;
+            object-fit: contain;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Card Content */
+        .card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+
+        .card-text {
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .price-text {
+            font-size: 1.25rem;
+            color: #e53e3e;
+            font-weight: 600;
+            margin-top: auto;
+            margin-bottom: 1rem;
+        }
+
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 1.25rem;
+        }
+
+        /* Filters */
+        .filters-container { 
+            margin-bottom: 2rem;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .form-select {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #4a5568;
+            box-shadow: none;
+            transition: border-color 0.2s ease;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #3182ce;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2c5282;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(49,130,206,0.2);
+        }
+
+        .btn-danger {
+            background-color: #e53e3e;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3182ce;
+        }
+
+        .cart-icon-container { 
+            position: relative; 
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .book-image {
+                height: 300px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .filters-container {
+                padding: 1rem;
+            }
+        
+            .book-card {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .book-card {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'book_list' %}">Bookstore</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'add_book' %}">
+                                    <i class="fas fa-plus"></i> Add Book
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link position-relative d-flex align-items-center" href="{% url 'cart' %}">
+                                    <div class="cart-icon-container">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ request.cart_count }}
+                                        </span>
+                                    </div>
+                                    <span class="ms-1">Cart</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link logout-link" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        <h1 class="text-center mb-4">Books Catalog</h1>
+        
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="row justify-content-center">
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <select class="form-select" id="genreFilter">
+                        <option value="">All Genres</option>
+                        {% for genre in genres %}
+                            <option value="{{ genre|lower }}">{{ genre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="priceFilter">
+                        <option value="">Sort by Price</option>
+                        <option value="high-low">Price: High to Low</option>
+                        <option value="low-high">Price: Low to High</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- No Results Message -->
+        <div id="noResultsMessage" style="display: none;" class="alert alert-info text-center">
+            No books found for the selected filters.
+        </div>
+        
+        <!-- Books Grid -->
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="booksGrid">
+            {% for book in books %}
+            <div class="col book-card" data-category="{{ book.genre|lower }}" data-price="{{ book.price }}">
+                <div class="card h-100">
+                    <img src="{{ book.cover_image.url }}" class="card-img-top book-image" alt="{{ book.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">Author: {{ book.author }}</p>
+                        <p class="card-text">Genre: {{ book.genre }}</p>
+                        <p class="price-text">Price: ${{ book.price }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if not user.is_staff %}
+                                <form method="post" action="{% url 'add_to_cart' book.id %}" class="add-to-cart-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if user.is_staff %}
+                                <form method="post" action="{% url 'delete_book' book.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-3 mt-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Bookstore. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- External Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom Scripts -->
+    <script>
+        function updateCartCount() {
+            fetch('/get_cart_count/')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = document.getElementById('cart-count');
+                    if (data.count > 0) {
+                        cartCount.textContent = data.count;
+                        cartCount.style.display = 'inline';
+                    } else {
+                        cartCount.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error updating cart count:', error));
+        }
+
+        function filterBooks() {
+            const selectedGenre = $('#genreFilter').val().toLowerCase();
+            const selectedPrice = $('#priceFilter').val();
+            let visibleCards = $('.book-card');
+
+            visibleCards.each(function() {
+                const card = $(this);
+                const cardGenre = card.data('category').toLowerCase();
+                const shouldShow = !selectedGenre || cardGenre === selectedGenre;
+                card.toggle(shouldShow);
+            });
+
+            if (selectedPrice) {
+                visibleCards = visibleCards.filter(':visible').sort((a, b) => {
+                    const priceA = parseFloat($(a).data('price'));
+                    const priceB = parseFloat($(b).data('price'));
+                    return selectedPrice === 'low-high' ? priceA - priceB : priceB - priceA;
+                });
+                $('#booksGrid').append(visibleCards);
+            }
+
+            $('#noResultsMessage').toggle($('.book-card:visible').length === 0);
+        }
+
+        $(document).ready(function() {
+            updateCartCount();
+            
+            $('.add-to-cart-form').on('submit', function(e) {
+                e.preventDefault();
+                $.post($(this).attr('action'), $(this).serialize())
+                    .done(function() {
+                        updateCartCount();
+                    })
+                    .fail(function(xhr) {
+                        console.error('Error adding to cart:', xhr.responseText);
+                    });
+            });
+
+            $('#genreFilter, #priceFilter').on('change', filterBooks);
+
+            const savedGenre = localStorage.getItem('selectedGenre');
+            const savedPrice = localStorage.getItem('selectedPrice');
+            if (savedGenre) $('#genreFilter').val(savedGenre);
+            if (savedPrice) $('#priceFilter').val(savedPrice);
+            filterBooks();
+
+            $('#genreFilter, #priceFilter').on('change', function() {
+                localStorage.setItem('selectedGenre', $('#genreFilter').val());
+                localStorage.setItem('selectedPrice', $('#priceFilter').val());
+            });
+        });
+
+        document.querySelector('.logout-link')?.addEventListener('click', (event) => {
+            event.preventDefault(); 
+            fetch('/get_cart_items/')
+                .then(response => response.json())
+                .then(data => {
+                    localStorage.setItem('cart', JSON.stringify(data.cart));
+                    console.log('Cart saved to localStorage:', data.cart);
+                    window.location.href = event.target.href;
+                })
+                .catch(error => {
+                    console.error('Error saving cart to localStorage:', error);
+                    window.location.href = event.target.href;
+                });
+        });
+
+        const MessageManager = {
+            container: document.querySelector('.alert-container'),
+
+            show(message, type = 'success', duration = 3000) {
+                const alertId = `alert-${Date.now()}`;
+                const alertElement = document.createElement('div');
+                alertElement.id = alertId;
+                alertElement.className = `alert alert-${type}`;
+                alertElement.textContent = message;
+                this.container.appendChild(alertElement);
+                setTimeout(() => {
+                    alertElement.classList.add('fade-out');
+                    setTimeout(() => alertElement.remove(), 200);
+                }, duration);
+            },
+
+            init() {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    setTimeout(() => {
+                        alert.classList.add('fade-out');
+                        setTimeout(() => alert.remove(), 200);
+                    }, 1000);
+                });
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+            MessageManager.init();
+            if (typeof messages !== 'undefined' && messages.length > 0) {
+                messages.forEach(({ message, tags }) => {
+                    MessageManager.show(message, tags);
+                });
+            }
+        });
+        window.showMessage = (message, type = 'success', duration = 3000) => MessageManager.show(message, type, duration);
+    </script>
+</body>
+</html>
