@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+ # BOOK MODEL  
 class Book(models.Model):
     title = models.CharField(max_length=100)
     author = models.CharField(max_length=50)
@@ -8,6 +9,7 @@ class Book(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     cover_image = models.ImageField(upload_to='book_covers/', null=True, blank=True)
 
+ # CART MODEL  
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -15,6 +17,7 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart for {self.user.username if self.user else 'Anonymous'}"
 
+ # CART ITEM MODEL  
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='cart_items', on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
@@ -24,6 +27,7 @@ class CartItem(models.Model):
     class Meta:
         unique_together = ('cart', 'book')
 
+ # ADDRESS MODEL  
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     street_address = models.CharField(max_length=255)
@@ -39,6 +43,7 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = 'Addresses'
 
+ # ORDER MODEL       
 class Order(models.Model):
     cart = models.OneToOneField(Cart, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
