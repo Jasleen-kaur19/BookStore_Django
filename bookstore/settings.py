@@ -131,8 +131,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT =  '/Users/jasleenkaur/Downloads/JK_Project/media'
 MEDIA_URL = '/media/'
-LOGIN_URL = '/login/'  
-LOGIN_REDIRECT_URL = '/book_list/'  
-LOGOUT_REDIRECT_URL = '/logout/'  
 
 
