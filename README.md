@@ -79,18 +79,5 @@ Stay on top of operations by reviewing and fulfilling orders.
 ## 🤝 Contributing
 We welcome contributions! Feel free to fork the repository, make your improvements, and submit a pull request.
 
-## 📄 License
-This project is licensed under the MIT License.
-
 ## 🌟 Acknowledgments
 Special thanks to Django for its robust framework and the entire community for inspiration. Happy coding! 😊
-
-
-
-### Key Enhancements:
-1. **Visual Appeal**: Added emojis and clear sections to make the README visually engaging.
-2. **Improved Structure**: Organized content into well-defined sections for clarity.
-3. **Contributions and Licensing**: Encourages collaboration and outlines project licensing.
-4. **Polished Language**: Made the language more professional and appealing.
-
-Let me know if you'd like further customization or additions! 🚀
