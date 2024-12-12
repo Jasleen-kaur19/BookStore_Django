@@ -39,3 +39,27 @@ This is a e-commerce application designed for a bookstore where users can browse
    ```bash
    git clone https://github.com/yourusername/bookstore-app.git
    cd bookstore-app
+
+2. **Update Media Path:**
+   Update the MEDIA_ROOT in settings.py to specify the location for media files:
+   MEDIA_ROOT = '/yourpath'
+
+3.**Run the Application:** 
+  Start the application server:
+  python manage.py runserver
+
+4.**Access the App:**
+  Open your browser and go to http://127.0.0.1:8000/ to view the bookstore application.
+
+## Usage
+
+For Users:
+  - Sign up and log in to start browsing books.
+  - Add books to your cart, update quantities, and proceed to checkout to place an order.
+  - Your cart items are saved and can be accessed on different devices after login.
+
+For Staff Members:
+  - Staff members can add and delete books from the store.
+  - Staff members can manage the entire inventory and review orders.
+
+
